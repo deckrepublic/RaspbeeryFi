@@ -1,5 +1,5 @@
 import unittest
-from raspberryfi import *
+from raspberrypifi import *
 
 
 class UtilityTest(unittest.TestCase):
