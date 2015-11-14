@@ -9,10 +9,12 @@ def clientconnect(context, root_layer):
 
 def request(context, flow):
     if is_new_client(flow.client_conn.address.host):
-        if did_client_just_connect(flow.client_conn.address.host):
+        if flow.request.host != 'localhost':
             change_request_to_login_page(flow.request)
-            unset_client_connect_flag(flow.client_conn.address.host)
-        elif has_login_info(flow.response):
+        elif flow.request.host == 'localhost' and (not flow.request.path or 
+            flow.request.path == '/'):
+            change_request_to_login_page(flow.request)
+        elif has_login_info(flow.request):
             # TODO: store login info
             add_client(flow.client_conn.address.host)
 

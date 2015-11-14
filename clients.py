@@ -35,3 +35,5 @@ def did_client_just_connect(host):
 def change_request_to_login_page(request):
     request.host = 'localhost'
     request.path = '/login.html'
+    request.method = 'GET'
+    request.scheme = 'http'
