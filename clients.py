@@ -30,3 +30,8 @@ def unset_client_connect_flag(host):
 
 def did_client_just_connect(host):
     return host in _client_connect_flags
+
+
+def change_request_to_login_page(request):
+    request.host = 'localhost'
+    request.path = '/login.html'
