@@ -1,35 +1,26 @@
 from netlib.http import Headers
+from utility import *
 
 
 _clients = []
-_client_connect_flags = []
+destinations = dict()
 
 
-def add_client(host):
+def add_client(host, username, password):
     if is_new_client(host):
-        _clients.append(host)
+        _clients.append(Client(host, username, password))
+        debug(str(_clients[-1]) + '\n')
 
 
 def is_new_client(host):
-    return host not in _clients
+    for client in _clients:
+        if client.host == host:
+            return False
+    return True
 
 
-def has_login_info(response):
-    # TODO
-    return False
-
-
-def set_client_connect_flag(host):
-    if host not in _client_connect_flags:
-        _client_connect_flags.append(host)
-
-
-def unset_client_connect_flag(host):
-    _client_connect_flags.remove(host)
-
-
-def did_client_just_connect(host):
-    return host in _client_connect_flags
+def has_login_info(request):
+    return request.host == 'localhost' and request.path == '/index.html'
 
 
 def change_request_to_login_page(request):
@@ -37,3 +28,13 @@ def change_request_to_login_page(request):
     request.path = '/login.html'
     request.method = 'GET'
     request.scheme = 'http'
+
+
+class Client:
+    def __init__(self, host, username, password):
+        self.host = host
+        self.username = username
+        self.password = password
+
+    def __str__(self):
+        return self.host + " - " + self.username + ":" + self.password

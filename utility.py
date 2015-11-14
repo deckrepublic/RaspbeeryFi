@@ -4,6 +4,19 @@ from HTMLParser import HTMLParser
 def debug(s):
     with open('out.txt', 'a') as file:
         file.write(str(s) + '\n')
+        
+
+def url_params_to_dict(params_string):
+    stuff = dict()
+
+    params = params_string.split('&')
+    for param in params:
+        split = param.split('=')
+        name = split[0]
+        value = split[1]
+        stuff[name] = value
+
+    return stuff
 
 
 def inject(string, injected, offset):
