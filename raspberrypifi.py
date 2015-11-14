@@ -21,8 +21,3 @@ def request(context, flow):
             flow.request.path = destinations[flow.client_conn.address.host][1]
             flow.request.method = 'GET'
             del destinations[flow.client_conn.address.host]
-
-
-def response(context, flow):
-    with decoded(flow.response):
-        pass
