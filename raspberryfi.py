@@ -35,6 +35,7 @@ def find_true_offset(string, lineno, line_offset):
                 newline_count += 1
                 if newline_count == lineno:
                     return i + line_offset + 1
+        raise ValueError('Not enough lines in string.')
 
     return line_offset 
 
