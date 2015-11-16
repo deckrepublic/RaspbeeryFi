@@ -8,11 +8,6 @@ WEB_ROOT = 'html'
 _clients = dict()
 
 
-def handle_request_if_new_client(flow):
-    if is_new_client(flow.client_conn.address.host):
-        handle_new_client_request(flow)
-
-
 def handle_new_client_request(flow):
     if request_is_to_internet(flow.request):
         if request_found_on_localhost(flow.request):
@@ -28,8 +23,8 @@ def handle_new_client_request(flow):
         change_request_to_start(flow.request)
 
 
-def replace_index_request_if_necessary(request):
-    if request_is_to_localhost(request) and request_path_is_empty(request):
+def replace_localhost_request_if_necessary(request):
+    if request_is_to_localhost(request):
         request.host = request.headers['host']
 
 
@@ -83,9 +78,17 @@ def change_request_to_login_page(request):
 def change_request_to_start(request):
     request.host = request.headers['Referer'] \
         .replace('http://' , '') \
-        .replace('https://', '') \
-        .replace('/', '')
-    request.path = '/'
+        .replace('https://', '')
+    if request.host[-1] == '/':
+        request.host = request.host[:-1]
+    split = request.host.split('/')
+    request.host = split[0]
+
+    if len(split) > 1:
+        request.path = '/' + '/'.join(split[1:])
+    else:
+        request.path = '/'
+
     request.method = 'GET'
     request.scheme = 'http'
     request.content = ''
