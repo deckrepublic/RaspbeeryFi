@@ -81,7 +81,10 @@ def change_request_to_login_page(request):
 
 
 def change_request_to_start(request):
-    request.host = 'google.com' 
+    request.host = request.headers['Referer'] \
+        .replace('http://' , '') \
+        .replace('https://', '') \
+        .replace('/', '')
     request.path = '/'
     request.method = 'GET'
     request.scheme = 'http'
