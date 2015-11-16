@@ -1,10 +1,11 @@
 from netlib.http import Headers
 from utility import *
+import os
 
 
 LOCALHOST = 'localhost'
+WEB_ROOT = 'html'
 _clients = dict()
-_destinations = dict()
 
 
 def handle_request_if_new_client(flow):
@@ -14,15 +15,30 @@ def handle_request_if_new_client(flow):
 
 def handle_new_client_request(flow):
     if request_is_to_internet(flow.request):
-        remember_original_request(flow)
-        change_request_to_login_page(flow.request)
+        if request_found_on_localhost(flow.request):
+            change_request_to_localhost(flow.request)
+        else:
+            change_request_to_login_page(flow.request)
 
     elif request_path_is_empty(flow.request):
         change_request_to_login_page(flow.request)
 
     elif request_has_client_login_info(flow.request):
         get_and_store_client_login_info(flow)
-        change_request_to_original_one(flow)
+        change_request_to_start(flow.request)
+
+
+def replace_index_request_if_necessary(request):
+    if request_is_to_localhost(request) and request_path_is_empty(request):
+        request.host = request.headers['host']
+
+
+def request_found_on_localhost(request):
+    return os.path.isfile(WEB_ROOT + request.path)
+
+
+def change_request_to_localhost(request):
+    request.host = LOCALHOST
 
 
 def request_is_to_internet(request):
@@ -36,12 +52,6 @@ def request_is_to_localhost(request):
 def request_path_is_empty(request):
     return not request.path or request.path == '/'
 
-
-def remember_original_request(flow):
-    if flow.client_conn.address.host not in _destinations:
-        _destinations[flow.client_conn.address.host] = [flow.request.host,
-            flow.request.path]
-    
 
 def store_client_login_info(host, username, password):
     if is_new_client(host):
@@ -70,11 +80,19 @@ def change_request_to_login_page(request):
     request.scheme = 'http'
 
 
-def change_request_to_original_one(flow):
-    flow.request.host = _destinations[flow.client_conn.address.host][0]
-    flow.request.path = _destinations[flow.client_conn.address.host][1]
-    flow.request.method = 'GET'
-    del _destinations[flow.client_conn.address.host]
+def change_request_to_start(request):
+    request.host = 'google.com' 
+    request.path = '/'
+    request.method = 'GET'
+    request.scheme = 'http'
+    request.content = ''
+    request.headers = Headers()
+
+
+def add_dont_cache_headers(response):
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
 
 
 class Client:
